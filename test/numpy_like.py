@@ -55,7 +55,33 @@ def test_backend(backend, group):
     def unary_op_huge(op):
         unary_op(op, [10000, 10000])
 
+    def binary_op_scale(op, scale):
+        binary_op(op, [scale], [scale])
+
+    def unary_op_scale(op, scale):
+        unary_op(op, [scale])
+
+    def binary_op_scale_square(op, scale):
+        binary_op(op, [scale, scale], [scale, scale])
+
     bm = benchmark.Benchmark(group, "/home/patz/benchmark/data/")
+
+    bm.linspace(
+            lambda s: binary_op_scale(backend.add, s),
+            1, 5_000_000, 100, 10, "add"
+            )
+
+    bm.linspace(
+            lambda s: binary_op_scale_square(backend.dot, s),
+            1, 3_000, 100, 10, "dot"
+            )
+
+    bm.linspace(
+            lambda s: unary_op_scale(backend.exp, s),
+            1, 5_000_000, 100, 10, "exp"
+            )
+
+    return
 
     print("  add")
     bm.run(lambda: binary_op_tiny(backend.add), 300, "add_tiny")

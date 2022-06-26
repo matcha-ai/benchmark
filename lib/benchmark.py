@@ -1,5 +1,6 @@
 import time
 import os
+import numpy as np
 
 class Benchmark:
     def __init__(self, group, target = "."):
@@ -25,3 +26,22 @@ class Benchmark:
                 end = time.time()
                 duration = end - begin
                 print(duration, file=file)
+
+    def space(self, function, space, n, name):
+        with open(self._dir + name + ".txt", "w") as file:
+            for _ in range(n):
+                for scale in space:
+                    print(scale)
+                    begin = time.time()
+                    function(int(scale))
+                    end = time.time()
+                    duration = end - begin
+                    print(scale, '\t', duration, file=file)
+
+    def linspace(self, function, low, high, points, n, name):
+        space = np.linspace(low, high, points).astype(int)
+        self.space(function, space, n, name)
+
+    def geomspace(self, function, low, high, points, n, name):
+        space = np.geomspace(low, high, points).astype(int)
+        self.space(function, space, n, name)
