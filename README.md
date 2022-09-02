@@ -1,4 +1,12 @@
-# matcha benchmark generator
+# Matcha benchmark generator
+
+## Requirements
+
+- Matcha headers and compiled binaries
+- Numpy, TensorFlow
+- Matplotlib, Scipy
+
+## Usage
 
 To build the C++ benchmarking program (into `build/`):
 
