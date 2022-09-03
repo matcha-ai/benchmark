@@ -2,6 +2,8 @@ import numpy as np
 import scipy.stats
 from Test import Test
 
+alpha = .001
+
 def init(out_dir: str):
     with open(f"{out_dir}/hypotheses.md", "w") as file:
         print("# Hypothesis testing Matcha vs. TensorFlow", file=file)
@@ -9,7 +11,9 @@ def init(out_dir: str):
 The following table contains hypothesis tests for specific scales (column "Scale")
 extracted from the generated linear space benchmarks (column "Benchmark").
 To verify whether the time means are significantly different, the two-sample
-independent t-test was used.
+independent t-test was used. Significance threashold $ \\alpha """ +
+f"= {alpha} $. Significant p-values are marked bold."
+"""
         """, file=file)
         print(f"|Benchmark|Scale|Mean Matcha|Mean TensorFlow|SD Matcha|SD TensorFlow|T-test p-value|", file=file)
         print(f"|---------|-----|-----------|---------------|---------|-------------|--------------|", file=file)
@@ -46,8 +50,8 @@ def run(tests: list[Test], out_dir: str, hypotheses: int = 5) -> str:
         m_tf, sd_tf = np.mean(buff["tensorflow"]), np.std(buff["tensorflow"], ddof=1)
         bm = f"{tests[0].operation} {tests[0].generator}"
         scale = x
-        ps = f"{p:.3f}"
-        if p < 1e-3:
+        ps = f"{p:.4f}"
+        if p <= alpha:
             ps = f"**{ps}**"
 
         with open(f"{out_dir}/hypotheses.md", "a") as file:
