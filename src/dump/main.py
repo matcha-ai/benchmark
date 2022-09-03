@@ -3,80 +3,10 @@
 import os, sys
 import numpy as np
 from Test import Test
-#import scipy.stats
-import matplotlib.pyplot as plt
+import make_data
+import make_plot
+import make_hypothesis
 
-def get_color(engine):
-    """every framework has its brand color"""
-
-    return {
-        "matcha": "#71c837",
-        "tensorflow": "#ff7400",
-        "numpy": "#4dabcf",
-    }[engine]
-
-def make_data(tests):
-    """extract quantitative data from the tests"""
-
-    data = {}
-    for test in tests:
-        x = test.data[:, 0]
-        y = test.data[:, 1]
-
-        deg = 3
-        coef = np.ndarray([deg + 1])
-        regression = np.polynomial.Polynomial(coef)
-        regression = regression.fit(x, y, deg)
-
-        temp = y[x.argsort()]
-        n = np.sum(x == x[0])
-        mrsd = 0
-        for i in range(0, len(temp), n):
-            temp2 = y[i:i+n]
-            mrsd += np.std(temp2) / np.mean(temp2)
-
-        mrsd /= (len(temp) / n)
-
-        data[test.engine] = [mrsd, *regression.coef]
-
-    return data
-
-def make_plot(tests, out_dir):
-    """generate a single plot from the tests"""
-
-    name = f"{tests[0].operation} {tests[0].generator}"
-    filename = f"{tests[0].operation}-{tests[0].generator}.jpeg"
-    path = f"{out_dir}/media/{filename}"
-    return filename
-
-    xlim = [0, 0]
-    ylim = [0, 0]
-    plt.figure(figsize=(8,4))
-
-
-    for test in tests:
-        x = test.data[:, 0]
-        y = test.data[:, 1]
-        engine = test.engine
-        color = get_color(engine)
-        plt.scatter(x, y, label=engine, marker="+", color=color)
-        xlim[0] = min(xlim[0], np.min(x))
-        xlim[1] = max(xlim[1], np.max(x))
-        ylim[1] = max(ylim[1], np.quantile(y, .95))
-
-
-    plt.legend(loc="upper left")
-    plt.xlim(xlim)
-    plt.ylim(ylim)
-
-    #plt.title(name)
-    plt.xlabel("scale")
-    plt.ylabel("time [s]")
-
-    plt.savefig(path)
-    plt.clf()
-    plt.close()
-    return filename
 
 def dump_op(op, tests, file, out_dir):
     media = f"{out_dir}/media"
@@ -96,8 +26,9 @@ def dump_op(op, tests, file, out_dir):
     for gen in sorted(by_generator):
         tests = sorted(by_generator[gen], key=lambda test: test.engine)
         #print([test.engine for test in tests])
-        data = make_data(tests)
-        plot = make_plot(tests, out_dir)
+        data = make_data.run(tests)
+        plot = make_plot.run(tests, out_dir)
+        hypo = make_hypothesis.run(tests, out_dir)
 
         print(f"#### {gen}", file=file)
 
@@ -139,6 +70,7 @@ def main(argv):
     out_dir = argv[2]
 
     tests = [Test(f"{data_dir}/{file}") for file in os.listdir(data_dir)]
+    make_hypothesis.init(out_dir)
 
     by_op = {}
     for test in tests:
