@@ -5,7 +5,12 @@ from Test import Test
 def init(out_dir: str):
     with open(f"{out_dir}/hypotheses.md", "w") as file:
         print("# Hypothesis testing Matcha vs. TensorFlow", file=file)
-        print(file=file)
+        print("""
+The following table contains hypothesis tests for specific scales (column "Scale")
+extracted from the generated linear space benchmarks (column "Benchmark").
+To verify whether the time means are significantly different, the two-sample
+independent t-test was used.
+        """, file=file)
         print(f"|Benchmark|Scale|Mean Matcha|Mean TensorFlow|SD Matcha|SD TensorFlow|T-test p-value|", file=file)
         print(f"|---------|-----|-----------|---------------|---------|-------------|--------------|", file=file)
 
